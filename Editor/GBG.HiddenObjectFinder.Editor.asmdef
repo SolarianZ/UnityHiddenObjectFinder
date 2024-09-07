@@ -1,6 +1,6 @@
 {
-    "name": "GBG.HiddenGameObjectFinder.Editor",
-    "rootNamespace": "GBG.HiddenGameObjectFinder.Editor",
+    "name": "GBG.HiddenObjectFinder.Editor",
+    "rootNamespace": "GBG.HiddenObjectFinder.Editor",
     "references": [],
     "includePlatforms": [
         "Editor"

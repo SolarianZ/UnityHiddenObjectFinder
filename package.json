@@ -1,12 +1,12 @@
 {
-  "name": "com.greenbamboogames.hiddengameobjectfinder",
+  "name": "com.greenbamboogames.hiddenobjectfinder",
   "version": "0.0.1",
-  "displayName": "Hidden GameObject Finder!",
-  "description": "Find hidden GameObejcts in loaded Scenes.",
+  "displayName": "Hidden Object Finder!",
+  "description": "Find hidden Objects in the Unity Editor.",
   "unity": "2019.4",
-  "documentationUrl": "https://github.com/SolarianZ/UnityHiddenGameObjectFinder",
-  "changelogUrl": "https://github.com/SolarianZ/UnityHiddenGameObjectFinder/releases",
-  "licensesUrl": "https://github.com/SolarianZ/UnityHiddenGameObjectFinder/blob/main/LICENSE",
+  "documentationUrl": "https://github.com/SolarianZ/UnityHiddenObjectFinder",
+  "changelogUrl": "https://github.com/SolarianZ/UnityHiddenObjectFinder/releases",
+  "licensesUrl": "https://github.com/SolarianZ/UnityHiddenObjectFinder/blob/main/LICENSE",
   "keywords": [
     "Asset",
     "Favorite",
