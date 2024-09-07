@@ -9,12 +9,15 @@ namespace GBG.HiddenObjectFinder.Editor
 {
     public static class HiddenObjectFinder
     {
-        public static List<GameObject> FindGameObjects(HideFlags hideFlagsFilter = HideFlags.HideInHierarchy)
+        public const HideFlags DefaultHideFlagsFilter = HideFlags.HideInHierarchy | HideFlags.HideInInspector;
+
+
+        public static List<GameObject> FindGameObjects(HideFlags hideFlagsFilter = DefaultHideFlagsFilter)
         {
             return FindAll<GameObject>(hideFlagsFilter);
         }
 
-        public static List<GameObject> FindGameObjects(this Scene scene, HideFlags hideFlagsFilter = HideFlags.HideInHierarchy)
+        public static List<GameObject> FindGameObjects(this Scene scene, HideFlags hideFlagsFilter = DefaultHideFlagsFilter)
         {
             if (scene.isLoaded)
             {
@@ -30,7 +33,7 @@ namespace GBG.HiddenObjectFinder.Editor
             return hiddenGoList;
         }
 
-        public static void FindHiddenGameObjectInHierarchy(this Transform rootGo, List<GameObject> resultForAppend, HideFlags hideFlagsFilter = HideFlags.HideInHierarchy)
+        public static void FindHiddenGameObjectInHierarchy(this Transform rootGo, List<GameObject> resultForAppend, HideFlags hideFlagsFilter = DefaultHideFlagsFilter)
         {
             if (resultForAppend == null)
             {
@@ -45,7 +48,7 @@ namespace GBG.HiddenObjectFinder.Editor
             rootGo.gameObject.FindHiddenGameObjectInHierarchy(resultForAppend, hideFlagsFilter);
         }
 
-        public static void FindHiddenGameObjectInHierarchy(this GameObject rootGo, List<GameObject> resultForAppend, HideFlags hideFlagsFilter = HideFlags.HideInHierarchy)
+        public static void FindHiddenGameObjectInHierarchy(this GameObject rootGo, List<GameObject> resultForAppend, HideFlags hideFlagsFilter = DefaultHideFlagsFilter)
         {
             if (resultForAppend == null)
             {
@@ -70,14 +73,19 @@ namespace GBG.HiddenObjectFinder.Editor
             }
         }
 
-        public static List<UObject> FindAll(bool excludeComponents, HideFlags hideFlagsFilter = HideFlags.HideInHierarchy)
+        public static List<UObject> FindAll(bool includeComponents, HideFlags hideFlagsFilter = DefaultHideFlagsFilter)
         {
             List<UObject> allHiddenObjects = FindAll<UObject>(hideFlagsFilter);
+            if (includeComponents)
+            {
+                return allHiddenObjects;
+            }
+
             List<UObject> nonCompHiddenObjects = allHiddenObjects.Where(obj => !(obj is Component)).ToList();
             return nonCompHiddenObjects;
         }
 
-        public static List<T> FindAll<T>(HideFlags hideFlagsFilter = HideFlags.HideInHierarchy) where T : UObject
+        public static List<T> FindAll<T>(HideFlags hideFlagsFilter = DefaultHideFlagsFilter) where T : UObject
         {
             T[] allObjects = UObject.FindObjectsOfType<T>();
             List<T> hiddenObjects = allObjects.Where(obj => obj.MatchHideFlags(hideFlagsFilter))

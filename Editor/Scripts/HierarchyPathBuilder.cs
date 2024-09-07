@@ -3,30 +3,31 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UObject = UnityEngine.Object;
 
 namespace GBG.HiddenObjectFinder.Editor
 {
     public static class HierarchyPathBuilder
     {
-        public static string BuildHierarchyPath(this Component component)
+        public static string BuildHierarchyPath(this UObject obj)
         {
-            if (!component)
+            if (!obj)
             {
-                throw new ArgumentNullException(nameof(component));
+                throw new ArgumentNullException(nameof(obj));
             }
 
-            Transform transform = component.transform;
-            StringBuilder builder = new StringBuilder();
-            builder.Append(transform.name);
-
-            Transform parent = transform.parent;
-            while (parent)
+            if (obj is GameObject go)
             {
-                builder.Insert(0, '/').Insert(0, parent.name);
-                parent = parent.parent;
+                return go.BuildHierarchyPath();
             }
-
-            return builder.ToString();
+            else if (obj is Component comp)
+            {
+                return comp.BuildHierarchyPath();
+            }
+            else
+            {
+                return obj.name;
+            }
         }
 
         public static string BuildHierarchyPath(this GameObject go)
@@ -37,6 +38,61 @@ namespace GBG.HiddenObjectFinder.Editor
             }
 
             return go.transform.BuildHierarchyPath();
+        }
+
+        public static string BuildHierarchyPath(this Component component)
+        {
+            if (!component)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
+
+            StringBuilder builder = new StringBuilder();
+            builder.Append($"::{component.GetType().Name}");
+
+            Transform transform = component.transform;
+            while (transform)
+            {
+                builder.Insert(0, '/').Insert(0, transform.name);
+                transform = transform.parent;
+            }
+
+            return builder.ToString();
+        }
+
+
+        public static List<string> BuildHierarchyPathParts(this UObject obj)
+        {
+            if (!obj)
+            {
+                throw new ArgumentNullException(nameof(obj));
+            }
+
+            if (obj is GameObject go)
+            {
+                return go.BuildHierarchyPathParts();
+            }
+            else if (obj is Component comp)
+            {
+                return comp.BuildHierarchyPathParts();
+            }
+            else
+            {
+                return new List<string> { obj.name };
+            }
+        }
+
+        public static List<string> BuildHierarchyPathParts(this GameObject go)
+        {
+            if (!go)
+            {
+                throw new ArgumentNullException(nameof(go));
+            }
+
+            List<string> pathParts = new List<string>();
+            go.BuildHierarchyPathInternal(pathParts);
+
+            return pathParts;
         }
 
         public static List<string> BuildHierarchyPathParts(this Component component)
@@ -52,20 +108,25 @@ namespace GBG.HiddenObjectFinder.Editor
             return pathParts;
         }
 
-        public static List<string> BuildHierarchyPathParts(this GameObject go)
+        private static void BuildHierarchyPathInternal(this GameObject go, List<string> pathParts)
         {
-            if (!go)
-            {
-                throw new ArgumentNullException(nameof(go));
-            }
+            Assert.IsNotNull(go);
+            Assert.IsNotNull(pathParts);
 
-            return go.transform.BuildHierarchyPathParts();
+            Transform transform = go.transform;
+            while (transform)
+            {
+                pathParts.Insert(0, transform.name);
+                transform = transform.parent;
+            }
         }
 
         private static void BuildHierarchyPathInternal(this Component component, List<string> pathParts)
         {
             Assert.IsNotNull(component);
             Assert.IsNotNull(pathParts);
+
+            pathParts.Add($"::{component.GetType().Name}");
 
             Transform transform = component.transform;
             while (transform)
