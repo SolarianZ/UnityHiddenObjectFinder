@@ -1,14 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEditor.IMGUI.Controls;
-using UnityEngine;
 
-namespace PackagesGBG.HiddenObjectFinder.Editor
+namespace GBG.HiddenObjectFinder.Editor
 {
     public class HierarchyTreeView : TreeView
     {
         public TreeViewItem Root { get; }
 
         private int _nextUniqueItemId = 1;
+
+        public event Action<HierarchyTreeViewItem> OnClickItem;
 
 
         public HierarchyTreeView(TreeViewState treeViewState) : base(treeViewState)
@@ -37,6 +39,16 @@ namespace PackagesGBG.HiddenObjectFinder.Editor
         {
             SetupDepthsFromParentsAndChildren(Root);
             return Root;
+        }
+
+        protected override void SingleClickedItem(int id)
+        {
+            //base.SingleClickedItem(id);
+            HierarchyTreeViewItem clickedItem = FindItem(id, Root) as HierarchyTreeViewItem;
+            if (clickedItem != null)
+            {
+                OnClickItem?.Invoke(clickedItem);
+            }
         }
     }
 }

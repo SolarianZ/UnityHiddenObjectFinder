@@ -29,7 +29,7 @@ namespace GBG.HiddenObjectFinder.Editor
 
             if (Object is Component comp)
             {
-                return comp.GetType().Name;
+                return $"[{comp.GetType().Name}]";
             }
 
             return Object.name;
