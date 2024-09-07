@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.SceneManagement;
 using UObject = UnityEngine.Object;
 
@@ -43,7 +44,7 @@ namespace GBG.HiddenObjectFinder.Editor
                 return;
             }
 
-            FindHiddenGameObjectInHierarchy(rootGo.gameObject, resultForAppend, hideFlagsFilter);
+            rootGo.gameObject.FindHiddenGameObjectInHierarchy(resultForAppend, hideFlagsFilter);
         }
 
         public static void FindHiddenGameObjectInHierarchy(this GameObject rootGo, List<GameObject> resultForAppend, HideFlags hideFlagsFilter = HideFlags.HideInHierarchy)
@@ -67,13 +68,15 @@ namespace GBG.HiddenObjectFinder.Editor
             for (int i = 0; i < rootTransform.childCount; i++)
             {
                 GameObject childGo = rootTransform.GetChild(i).gameObject;
-                FindHiddenGameObjectInHierarchy(childGo, resultForAppend, hideFlagsFilter);
+                childGo.FindHiddenGameObjectInHierarchy(resultForAppend, hideFlagsFilter);
             }
         }
 
-        public static List<UObject> FindAll(HideFlags hideFlagsFilter = HideFlags.HideInHierarchy)
+        public static List<UObject> FindAll(bool excludeComponents, HideFlags hideFlagsFilter = HideFlags.HideInHierarchy)
         {
-            return FindAll<UObject>(hideFlagsFilter);
+            List<UObject> allHiddenObjects = FindAll<UObject>(hideFlagsFilter);
+            List<UObject> nonCompHiddenObjects = allHiddenObjects.Where(obj => !(obj is Component)).ToList();
+            return nonCompHiddenObjects;
         }
 
         public static List<T> FindAll<T>(HideFlags hideFlagsFilter = HideFlags.HideInHierarchy) where T : UObject
@@ -84,25 +87,29 @@ namespace GBG.HiddenObjectFinder.Editor
             return hiddenObjects;
         }
 
+
         public static bool MatchHideFlags(this UObject obj, HideFlags hideFlagsFilter)
         {
             return obj && (obj.hideFlags & hideFlagsFilter) != 0;
         }
 
-        public static string BuildHierarchyPath(this Transform transform)
+
+        public static string BuildHierarchyPath(this Component component)
         {
-            if (!transform)
+            if (!component)
             {
-                throw new ArgumentNullException(nameof(transform));
+                throw new ArgumentNullException(nameof(component));
             }
 
+            Transform transform = component.transform;
             StringBuilder builder = new StringBuilder();
             builder.Append(transform.name);
-            transform = transform.parent;
-            while (transform)
+
+            Transform parent = transform.parent;
+            while (parent)
             {
-                builder.Insert(0, '/').Insert(0, transform.name);
-                transform = transform.parent;
+                builder.Insert(0, '/').Insert(0, parent.name);
+                parent = parent.parent;
             }
 
             return builder.ToString();
@@ -115,7 +122,43 @@ namespace GBG.HiddenObjectFinder.Editor
                 throw new ArgumentNullException(nameof(go));
             }
 
-            return BuildHierarchyPath(go.transform);
+            return go.transform.BuildHierarchyPath();
+        }
+
+        public static List<string> BuildHierarchyPathParts(this Component component)
+        {
+            if (!component)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
+
+            List<string> pathParts = new List<string>();
+            component.BuildHierarchyPathInternal(pathParts);
+
+            return pathParts;
+        }
+
+        public static List<string> BuildHierarchyPathParts(this GameObject go)
+        {
+            if (!go)
+            {
+                throw new ArgumentNullException(nameof(go));
+            }
+
+            return go.transform.BuildHierarchyPathParts();
+        }
+
+        private static void BuildHierarchyPathInternal(this Component component, List<string> pathParts)
+        {
+            Assert.IsNotNull(component);
+            Assert.IsNotNull(pathParts);
+
+            Transform transform = component.transform;
+            while (transform)
+            {
+                pathParts.Insert(0, transform.name);
+                transform = transform.parent;
+            }
         }
     }
 }

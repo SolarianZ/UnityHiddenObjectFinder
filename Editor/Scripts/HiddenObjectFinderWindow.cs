@@ -10,7 +10,7 @@ namespace GBG.HiddenObjectFinder.Editor
         [MenuItem("Tools/Bamboo/Hidden Object Finder")]
         public static void Open()
         {
-            GetWindow<HiddenObjectFinderWindow>("Hidden Object Finder");
+            GetWindow<HiddenObjectFinderWindow>("Hidden Object Finder").Focus();
         }
 
         #endregion
@@ -24,6 +24,11 @@ namespace GBG.HiddenObjectFinder.Editor
             {
                 Application.OpenURL("https://github.com/SolarianZ/UnityHiddenObjectFinder");
             }
+        }
+
+        private void OnGUI()
+        {
+
         }
 
         #endregion
