@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
+using UnityEditor.UIElements;
 using UnityEngine;
-using UEditor = UnityEditor.Editor;
+using UnityEngine.UIElements;
 using UObject = UnityEngine.Object;
 
 namespace GBG.HiddenObjectFinder.Editor
 {
+
     public class HiddenObjectFinderWindow : EditorWindow, IHasCustomMenu
     {
         #region Static
@@ -29,9 +31,8 @@ namespace GBG.HiddenObjectFinder.Editor
         private List<HierarchyItem> _rootHierarchyItems = new List<HierarchyItem>();
         [SerializeField]
         private TreeViewState _treeViewState;
-        private HierarchyTreeView _hierarchyTreeView;
-        private UEditor _objectEditor;
-        private UObject _selectedObject;
+        private HierarchyTreeViewElement _treeViewContainer;
+        private VisualElement _inspectorContainer;
 
 
         #region Unity Messages
@@ -47,49 +48,106 @@ namespace GBG.HiddenObjectFinder.Editor
         private void OnEnable()
         {
             minSize = new Vector2(600, 280);
-
             _treeViewState = _treeViewState ?? new TreeViewState();
-            _hierarchyTreeView = new HierarchyTreeView(_treeViewState);
-            _hierarchyTreeView.OnClickItem += OnClickHiddenObject;
         }
 
-        private void OnGUI()
+        private void CreateGUI()
         {
-            _objectTypes = (ObjectTypes)EditorGUILayout.EnumFlagsField("Object Types", _objectTypes);
-            _hideFlagsFilter = (HideFlags)EditorGUILayout.EnumFlagsField("Hide Flags Filter", _hideFlagsFilter);
+            #region Top
 
-            EditorGUILayout.Space();
-            if (GUILayout.Button("Find"))
+            VisualElement topContainer = new VisualElement
             {
-                _selectedObject = null;
-                FindHiddenObjects();
-                RebuildHierarchyTreeView();
-            }
+                name = "TopContainer",
+                style =
+                {
+                    flexShrink = 0,
+                }
+            };
+            rootVisualElement.Add(topContainer);
 
-            EditorGUILayout.Space();
-
-
-            Rect usedRect = GUILayoutUtility.GetLastRect();
-            GUILayout.BeginHorizontal();
+            EnumFlagsField objectTypesField = new EnumFlagsField("Object Types", _objectTypes)
             {
-                const float TreeWidth = 300;
-                EditorGUILayout.BeginVertical();
-                GUILayout.BeginArea(new Rect(usedRect.xMin, usedRect.yMax, TreeWidth, position.height - usedRect.yMax));
-                _hierarchyTreeView.OnGUI(new Rect(usedRect.xMin, usedRect.yMax, TreeWidth, position.height - usedRect.yMax));
-                GUILayout.EndArea();
-                EditorGUILayout.EndVertical();
-                //EditorGUILayout.LabelField(string.Empty, GUI.skin.verticalSlider,GUILayout.ExpandHeight(true));
+                name = "ObjectTypesField",
+                bindingPath = nameof(_objectTypes),
+            };
+            topContainer.Add(objectTypesField);
 
-                EditorGUILayout.BeginVertical();
-                UEditor.CreateCachedEditor(_selectedObject, null, ref _objectEditor);
-                _objectEditor?.OnInspectorGUI();
-                EditorGUILayout.EndVertical();
-            }
-            GUILayout.EndHorizontal();
+            EnumFlagsField enumFlagsField = new EnumFlagsField("Hide Flags Filter", _hideFlagsFilter)
+            {
+                name = "HideFlagsFilterField",
+                bindingPath = nameof(_hideFlagsFilter),
+            };
+            topContainer.Add(enumFlagsField);
+
+            Button findButton = new Button(OnFindButtonClicked)
+            {
+                name = "FindButton",
+                text = "Find",
+            };
+            topContainer.Add(findButton);
+
+            #endregion
+
+
+            VisualElement contentContainer = new VisualElement
+            {
+                name = "ContentContainer",
+                style =
+                {
+                    flexGrow = 1,
+                    flexDirection = FlexDirection.Row,
+                }
+            };
+            rootVisualElement.Add(contentContainer);
+
+
+            #region Hierarchy Tree View
+
+            _treeViewContainer = new HierarchyTreeViewElement(_treeViewState)
+            {
+                name = "HierarchyTreeViewContainer",
+                style =
+                {
+                    width = 200,
+                }
+            };
+            _treeViewContainer.HierarchyTreeView.OnClickItem += OnClickHiddenObject;
+            contentContainer.Add(_treeViewContainer);
+
+            #endregion
+
+
+            #region Inspector
+
+            _inspectorContainer = new VisualElement
+            {
+                name = "InspectorContainer",
+                style =
+                {
+                    flexGrow = 1,
+                }
+            };
+            contentContainer.Add(_inspectorContainer);
+
+            #endregion
+
+
+            #region Bind Properties
+
+            rootVisualElement.Bind(new SerializedObject(this));
+
+            #endregion
         }
 
         #endregion
 
+
+        private void OnFindButtonClicked()
+        {
+            _inspectorContainer.Clear();
+            FindHiddenObjects();
+            RebuildHierarchyTreeView();
+        }
 
         private void FindHiddenObjects()
         {
@@ -136,34 +194,49 @@ namespace GBG.HiddenObjectFinder.Editor
             _treeViewState.lastClickedID = -1;
             _treeViewState.selectedIDs.Clear();
             _treeViewState.expandedIDs.Clear();
-            _hierarchyTreeView.ClearItems();
+            _treeViewContainer.ClearItems();
 
             Dictionary<HierarchyItem, HierarchyTreeViewItem> registry = new Dictionary<HierarchyItem, HierarchyTreeViewItem>();
             foreach (HierarchyItem hierarchyItem in _rootHierarchyItems)
             {
-                CreateTree(_hierarchyTreeView.Root, hierarchyItem, 0, registry);
+                CreateTree(_treeViewContainer.RootItem, hierarchyItem, 0, registry);
             }
 
-            _hierarchyTreeView.Reload();
-            _hierarchyTreeView.ExpandAll();
+            _treeViewContainer.Reload();
+            _treeViewContainer.ExpandAll();
         }
 
         private void CreateTree(TreeViewItem parent, HierarchyItem hierarchyItem, int depth,
             Dictionary<HierarchyItem, HierarchyTreeViewItem> registry)
         {
-            HierarchyTreeViewItem treeViewItem = new HierarchyTreeViewItem(_hierarchyTreeView.GetUniqueItemId(), depth, hierarchyItem);
+            HierarchyTreeViewItem treeViewItem = new HierarchyTreeViewItem(_treeViewContainer.GetUniqueItemId(), depth, hierarchyItem);
 
             parent.AddChild(treeViewItem);
 
-            foreach (HierarchyItem childHierarchyItem in hierarchyItem.Children)
+            for (int i = hierarchyItem.Children.Count - 1; i >= 0; i--)
             {
+                HierarchyItem childHierarchyItem = hierarchyItem.Children[i];
                 CreateTree(treeViewItem, childHierarchyItem, depth + 1, registry);
             }
         }
 
         private void OnClickHiddenObject(HierarchyTreeViewItem item)
         {
-            _selectedObject = item.HierarchyItem.Object;
+            _inspectorContainer.Clear();
+            UObject selectedObject = item.HierarchyItem.Object;
+            if (!selectedObject)
+            {
+                return;
+            }
+
+            _inspectorContainer.Add(new InspectorElement(selectedObject)
+            {
+                name = "Inspector",
+                style =
+                {
+                    flexGrow = 1,
+                }
+            });
         }
 
 
