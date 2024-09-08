@@ -27,15 +27,23 @@ namespace GBG.HiddenObjectFinder.Editor
             EditorGUI.BeginDisabledGroup(!targetObjModifiable);
             {
                 _newHideFlags = (HideFlags)EditorGUILayout.EnumFlagsField("New Hide Flags", _newHideFlags);
-
                 EditorGUILayout.Space();
-                if (GUILayout.Button("Set New Hide Flags"))
+                GUILayout.BeginHorizontal();
                 {
-                    Undo.RecordObject(_object, "Set HideFlags");
-                    _object.hideFlags = _newHideFlags;
+                    if (GUILayout.Button("Set New Hide Flags"))
+                    {
+                        Undo.RecordObject(_object, "Set HideFlags");
+                        _object.hideFlags = _newHideFlags;
+                        EditorApplication.RepaintHierarchyWindow();
+                    }
 
-                    EditorApplication.RepaintHierarchyWindow();
+                    if (GUILayout.Button("Delete", GUILayout.Width(100)))
+                    {
+                        Undo.DestroyObjectImmediate(_object);
+                        EditorApplication.RepaintHierarchyWindow();
+                    }
                 }
+                GUILayout.EndHorizontal();
             }
             EditorGUI.EndDisabledGroup();
         }

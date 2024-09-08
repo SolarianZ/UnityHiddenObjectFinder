@@ -4,7 +4,7 @@
 
 Find hidden Obejcts in the Unity Editor.
 
-![Hidden Object Finder Window](./Documents~/imgs/img_sample_hidden_bject_finder_window.png)
+![Hidden Object Finder Window](./Documents~/imgs/img_sample_hidden_object_finder_window.png)
 
 ## Supported Unity Version
 
