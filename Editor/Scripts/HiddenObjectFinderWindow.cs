@@ -165,17 +165,17 @@ namespace GBG.HiddenObjectFinder.Editor
                     break;
 
                 case ObjectTypes.Component:
-                    hiddenObjList = HiddenObjectFinder.FindAll<Component>().ConvertAll(comp => (UObject)comp);
+                    hiddenObjList = HiddenObjectFinder.FindAll<Component>(_hideFlagsFilter).ConvertAll(comp => (UObject)comp);
                     break;
 
                 case ObjectTypes.Other:
-                    hiddenObjList = HiddenObjectFinder.FindAll(false).Where(obj => !(obj is GameObject)).ToList();
+                    hiddenObjList = HiddenObjectFinder.FindAll(false, _hideFlagsFilter).Where(obj => !(obj is GameObject)).ToList();
                     break;
 
                 // Mixed types
                 default:
                     bool includeComponent = (_objectTypes & ObjectTypes.Component) != 0;
-                    IEnumerable<UObject> tempObjs = HiddenObjectFinder.FindAll(includeComponent);
+                    IEnumerable<UObject> tempObjs = HiddenObjectFinder.FindAll(includeComponent, _hideFlagsFilter);
                     bool includeGameObject = (_objectTypes & ObjectTypes.GameObject) != 0;
                     if (!includeGameObject)
                     {
