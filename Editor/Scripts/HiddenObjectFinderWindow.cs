@@ -10,7 +10,6 @@ using UObject = UnityEngine.Object;
 
 namespace GBG.HiddenObjectFinder.Editor
 {
-
     public class HiddenObjectFinderWindow : EditorWindow, IHasCustomMenu
     {
         #region Static
@@ -31,8 +30,8 @@ namespace GBG.HiddenObjectFinder.Editor
         private List<HierarchyItem> _rootHierarchyItems = new List<HierarchyItem>();
         [SerializeField]
         private TreeViewState _treeViewState;
-        private HierarchyTreeViewElement _treeViewContainer;
-        private VisualElement _inspectorContainer;
+        private HierarchyTreeViewElement _treeView;
+        private HiddenObjectInspectorElement _inspector;
 
 
         #region Unity Messages
@@ -103,7 +102,7 @@ namespace GBG.HiddenObjectFinder.Editor
 
             #region Hierarchy Tree View
 
-            _treeViewContainer = new HierarchyTreeViewElement(_treeViewState)
+            _treeView = new HierarchyTreeViewElement(_treeViewState)
             {
                 name = "HierarchyTreeViewContainer",
                 style =
@@ -111,15 +110,15 @@ namespace GBG.HiddenObjectFinder.Editor
                     width = 200,
                 }
             };
-            _treeViewContainer.HierarchyTreeView.OnClickItem += OnClickHiddenObject;
-            contentContainer.Add(_treeViewContainer);
+            _treeView.HierarchyTreeView.OnClickItem += OnClickHiddenObject;
+            contentContainer.Add(_treeView);
 
             #endregion
 
 
             #region Inspector
 
-            _inspectorContainer = new VisualElement
+            _inspector = new HiddenObjectInspectorElement
             {
                 name = "InspectorContainer",
                 style =
@@ -127,7 +126,7 @@ namespace GBG.HiddenObjectFinder.Editor
                     flexGrow = 1,
                 }
             };
-            contentContainer.Add(_inspectorContainer);
+            contentContainer.Add(_inspector);
 
             #endregion
 
@@ -144,7 +143,7 @@ namespace GBG.HiddenObjectFinder.Editor
 
         private void OnFindButtonClicked()
         {
-            _inspectorContainer.Clear();
+            _inspector.SetTarget(null);
             FindHiddenObjects();
             RebuildHierarchyTreeView();
         }
@@ -194,22 +193,22 @@ namespace GBG.HiddenObjectFinder.Editor
             _treeViewState.lastClickedID = -1;
             _treeViewState.selectedIDs.Clear();
             _treeViewState.expandedIDs.Clear();
-            _treeViewContainer.ClearItems();
+            _treeView.ClearItems();
 
             Dictionary<HierarchyItem, HierarchyTreeViewItem> registry = new Dictionary<HierarchyItem, HierarchyTreeViewItem>();
             foreach (HierarchyItem hierarchyItem in _rootHierarchyItems)
             {
-                CreateTree(_treeViewContainer.RootItem, hierarchyItem, 0, registry);
+                CreateTree(_treeView.RootItem, hierarchyItem, 0, registry);
             }
 
-            _treeViewContainer.Reload();
-            _treeViewContainer.ExpandAll();
+            _treeView.Reload();
+            _treeView.ExpandAll();
         }
 
         private void CreateTree(TreeViewItem parent, HierarchyItem hierarchyItem, int depth,
             Dictionary<HierarchyItem, HierarchyTreeViewItem> registry)
         {
-            HierarchyTreeViewItem treeViewItem = new HierarchyTreeViewItem(_treeViewContainer.GetUniqueItemId(), depth, hierarchyItem);
+            HierarchyTreeViewItem treeViewItem = new HierarchyTreeViewItem(_treeView.GetUniqueItemId(), depth, hierarchyItem);
 
             parent.AddChild(treeViewItem);
 
@@ -222,21 +221,8 @@ namespace GBG.HiddenObjectFinder.Editor
 
         private void OnClickHiddenObject(HierarchyTreeViewItem item)
         {
-            _inspectorContainer.Clear();
             UObject selectedObject = item.HierarchyItem.Object;
-            if (!selectedObject)
-            {
-                return;
-            }
-
-            _inspectorContainer.Add(new InspectorElement(selectedObject)
-            {
-                name = "Inspector",
-                style =
-                {
-                    flexGrow = 1,
-                }
-            });
+            _inspector.SetTarget(selectedObject);
         }
 
 
