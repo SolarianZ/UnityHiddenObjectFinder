@@ -18,4 +18,12 @@ Install this package via [OpenUPM](https://openupm.com/packages/com.greenbamboog
 
 ## How to use
 
-TODO
+Open the Hidden Object Finder tool window from the menu **Tools/Bamboo/Hidden Object Finder**.
+
+Use the **Object Types** option to set the types of objects you want to find, and use the **Hide Flags Filter** option to set which types of hidden flags to search for. Then click the **Find** button to display the search results on the left side of the window. After selecting a search result, you can preview and edit the object in the right panel of the window.
+
+**Note**: The window does not automatically refresh the list of search results. If you modify the object's hidden flags or delete an object, you need to perform the search again to refresh the list.
+
+### API
+
+You can call the static methods of the `GBG.HiddenObjectFinder.Editor.HiddenObjectFinder` class to find hidden objects through a script.

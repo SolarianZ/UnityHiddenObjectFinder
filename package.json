@@ -1,6 +1,6 @@
 {
   "name": "com.greenbamboogames.hiddenobjectfinder",
-  "version": "0.0.2-preview",
+  "version": "1.0.0-preview",
   "displayName": "Hidden Object Finder!",
   "description": "Find hidden Objects in the Unity Editor.",
   "unity": "2019.4",
@@ -8,10 +8,10 @@
   "changelogUrl": "https://github.com/SolarianZ/UnityHiddenObjectFinder/releases",
   "licensesUrl": "https://github.com/SolarianZ/UnityHiddenObjectFinder/blob/main/LICENSE",
   "keywords": [
-    "Asset",
-    "Favorite",
-    "Quick Access",
-    "Record"
+    "Hidden",
+    "Object",
+    "Finder",
+    "HideFlags"
   ],
   "author": {
     "name": "ZQY",
