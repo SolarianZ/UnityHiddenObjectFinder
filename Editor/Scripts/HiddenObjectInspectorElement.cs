@@ -34,6 +34,7 @@ namespace GBG.HiddenObjectFinder.Editor
                     {
                         Undo.RecordObject(_object, "Set HideFlags");
                         _object.hideFlags = _newHideFlags;
+                        EditorUtility.SetDirty(_object);
                         EditorApplication.RepaintHierarchyWindow();
                     }
 

@@ -19,12 +19,6 @@ namespace GBG.HiddenObjectFinder.Editor
         private void OnGUI()
         {
             Rect drawArea = localBound;
-
-            var c = GUI.backgroundColor;
-            GUI.backgroundColor = Color.white;
-            GUI.Box(drawArea, "test");
-            GUI.backgroundColor = c;
-
             HierarchyTreeView.OnGUI(drawArea);
         }
 

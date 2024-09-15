@@ -42,8 +42,9 @@ namespace GBG.HiddenObjectFinder.Editor
                 EditorGUILayout.Space();
                 if (GUILayout.Button("Set New Hide Flags"))
                 {
+                    Undo.RecordObject(_targetObj, "Set HideFlags");
                     _targetObj.hideFlags = _newHideFlags;
-
+                    EditorUtility.SetDirty(_targetObj);
                     EditorApplication.RepaintHierarchyWindow();
                 }
             }
