@@ -17,7 +17,7 @@ namespace GBG.HiddenObjectFinder.Editor
         [MenuItem("Tools/Bamboo/Hidden Object Finder")]
         public static void Open()
         {
-            GetWindow<HiddenObjectFinderWindow>("Hidden Object Finder").Focus();
+            GetWindow<HiddenObjectFinderWindow>().Focus();
         }
 
         #endregion
@@ -46,6 +46,9 @@ namespace GBG.HiddenObjectFinder.Editor
 
         private void OnEnable()
         {
+            titleContent = EditorGUIUtility.IconContent(
+                EditorGUIUtility.isProSkin ? "d_SceneViewVisibility" : "SceneViewVisibility");
+            titleContent.text = "Hidden Object Finder";
             minSize = new Vector2(600, 280);
             _treeViewState = _treeViewState ?? new TreeViewState();
         }
