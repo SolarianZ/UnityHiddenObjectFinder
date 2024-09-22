@@ -73,7 +73,7 @@ namespace GBG.HiddenObjectFinder.Editor
             }
             else
             {
-                _inspector = new Label("The object has been deleted.");
+                _inspector = new Label("No object is selected, or the selected object has been deleted.");
             }
 
             Add(_inspector);
